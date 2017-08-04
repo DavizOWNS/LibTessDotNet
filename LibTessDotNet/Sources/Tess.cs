@@ -126,6 +126,8 @@ namespace LibTessDotNet
         public int[] Elements { get { return _elements; } }
         public int ElementCount { get { return _elementCount; } }
 
+        public float TotalArea { get; private set; }
+
         public Tess()
         {
             _normal = Vec3.Zero;
@@ -450,6 +452,7 @@ namespace LibTessDotNet
             int maxFaceCount = 0;
             int maxVertexCount = 0;
             int faceVerts, i;
+            float totalArea = 0;
 
             if (polySize < 3)
             {
@@ -526,14 +529,15 @@ namespace LibTessDotNet
             {
                 if (!f._inside) continue;
 
+                var area = MeshUtils.FaceArea(f);
                 if (NoEmptyPolygons)
                 {
-                    var area = MeshUtils.FaceArea(f);
                     if (Math.Abs(area) < Real.Epsilon)
                     {
                         continue;
                     }
                 }
+                totalArea += area;
 
                 // Store polygon
                 edge = f._anEdge;
@@ -566,6 +570,8 @@ namespace LibTessDotNet
                     }
                 }
             }
+
+            TotalArea = totalArea / 2;
         }
 
         private void OutputContours()
